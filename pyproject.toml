@@ -1,0 +1,28 @@
+
+# Build configuration: how Python packages this project
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+# Basic project information
+[project]
+name = "sequencing-qc-explorer"
+version = "0.1.0"
+description = "A Python toolkit for Illumina and ONT sequencing quality analysis"
+requires-python = ">=3.12"
+dependencies = [
+    "biopython>=1.83,<2",
+    "numpy>=1.26,<3",
+    "pandas>=2.2,<3",
+    "matplotlib>=3.8,<4"
+]
+
+# Tools needed for development and testing
+[project.optional-dependencies]
+dev = [
+    "pytest>=8,<10"
+]
+
+# Tell setuptools to look for Python packages inside src/
+[tool.setuptools.packages.find]
+where = ["src"]

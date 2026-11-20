@@ -1,0 +1,40 @@
+# =========================================
+# SEQQC EXPLORER - GIT IGNORE RULES
+# =========================================
+
+# Python-generated files
+__pycache__/
+*.py[cod]
+
+# Python environments
+.venv/
+venv/
+env/
+
+# Python build and testing files
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+
+# macOS system files
+.DS_Store
+
+# Raw sequencing datasets
+data/raw/*
+
+# Generated reports and figures
+results/reports/*
+results/figures/*
+
+# Allow placeholder files in ignored directories
+!data/raw/.gitkeep
+!results/reports/.gitkeep
+!results/figures/.gitkeep
+
+# =========================================
+# PRIVATE LEARNING NOTES
+# =========================================
+
+# Personal step-by-step learning documentation
+LEARNING_LOG.md
