@@ -88,3 +88,52 @@ def calculate_q_percentage(quality_string, threshold):
 
     # Return percentage.
     return (passing_bases / len(scores)) * 100
+
+
+import numpy as np
+
+
+def calculate_length_statistics(read_lengths):
+    """
+    Calculate read-length summary statistics.
+
+    Parameters
+    ----------
+    read_lengths : list
+        Lengths of sequencing reads.
+
+    Returns
+    -------
+    dict
+        Minimum, maximum, mean, median,
+        standard deviation and read N50.
+    """
+
+    # Convert read lengths to a NumPy array.
+    lengths = np.asarray(read_lengths)
+
+    # Check whether the list is empty.
+    if lengths.size == 0:
+        raise ValueError("No read lengths provided")
+
+    # Sort read lengths from longest to shortest.
+    sorted_lengths = np.sort(lengths)[::-1]
+
+    # Calculate cumulative sequenced bases.
+    cumulative_bases = np.cumsum(sorted_lengths)
+
+    # Find the position where half the bases are covered.
+    halfway = np.sum(sorted_lengths) / 2
+
+    # Find the first length reaching the halfway point.
+    n50_index = np.searchsorted(cumulative_bases, halfway)
+    n50 = sorted_lengths[n50_index]
+
+    return {
+        "minimum": int(np.min(lengths)),
+        "maximum": int(np.max(lengths)),
+        "mean": float(np.mean(lengths)),
+        "median": float(np.median(lengths)),
+        "standard_deviation": float(np.std(lengths)),
+        "n50": int(n50),
+    }
