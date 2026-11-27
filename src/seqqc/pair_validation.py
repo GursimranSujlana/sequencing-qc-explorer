@@ -1,5 +1,6 @@
 
 # Import the FASTQ parser we already developed.
+from itertools import zip_longest
 from seqqc.fastq_parser import read_fastq
 
 
@@ -17,38 +18,42 @@ def get_spot_id(read_id):
 
 
 def check_read_pairs(r1_path, r2_path):
-    """
-    Compare the spot identifiers in two FASTQ files.
-
-    Returns counts of matching and unmatched reads.
-    """
-
-    # Collect identifiers from Read 1.
+    """Summarize shared spot IDs and record-by-record alignment."""
     r1_ids = set()
-
-    for read_id, sequence, quality in read_fastq(r1_path):
-        r1_ids.add(get_spot_id(read_id))
-
-    # Collect identifiers from Read 2.
     r2_ids = set()
+    position_matches = 0
+    position_mismatches = 0
+    extra_r1_records = 0
+    extra_r2_records = 0
 
-    for read_id, sequence, quality in read_fastq(r2_path):
-        r2_ids.add(get_spot_id(read_id))
+    for r1_record, r2_record in zip_longest(
+        read_fastq(r1_path), read_fastq(r2_path)
+    ):
+        r1_id = get_spot_id(r1_record[0]) if r1_record is not None else None
+        r2_id = get_spot_id(r2_record[0]) if r2_record is not None else None
 
-    # Find identifiers present in both files.
-    paired_ids = r1_ids.intersection(r2_ids)
+        if r1_id is not None:
+            r1_ids.add(r1_id)
+        if r2_id is not None:
+            r2_ids.add(r2_id)
 
-    # Find identifiers appearing only in R1.
-    r1_only = r1_ids.difference(r2_ids)
+        if r1_id is None:
+            extra_r2_records += 1
+        elif r2_id is None:
+            extra_r1_records += 1
+        elif r1_id == r2_id:
+            position_matches += 1
+        else:
+            position_mismatches += 1
 
-    # Find identifiers appearing only in R2.
-    r2_only = r2_ids.difference(r1_ids)
-
-    # Return summary statistics.
     return {
         "r1_unique_ids": len(r1_ids),
         "r2_unique_ids": len(r2_ids),
-        "complete_pairs": len(paired_ids),
-        "r1_only": len(r1_only),
-        "r2_only": len(r2_only),
+        "complete_pairs": len(r1_ids & r2_ids),
+        "r1_only": len(r1_ids - r2_ids),
+        "r2_only": len(r2_ids - r1_ids),
+        "position_matches": position_matches,
+        "position_mismatches": position_mismatches,
+        "extra_r1_records": extra_r1_records,
+        "extra_r2_records": extra_r2_records,
     }
